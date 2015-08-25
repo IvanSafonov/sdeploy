@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import shutil
+from optparse import OptionParser
+import tarfile
+import subprocess
+from logger import Logger
+from configloader import ConfigLoader
+from filesanalyser import FilesAnalyser
+from sshclient import SshClient
+
+def optionList(option, opt, value, parser):
+    setattr(parser.values, option.dest, value.split(','))
+
+if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option("-a", "--host", dest="host", help="remote linux machine host")
+    parser.add_option("-p", "--port", dest="port", help="ssh port, 22 by default")
+    parser.add_option("-u", "--user", dest="user", help="ssh user name")
+    parser.add_option("-s", "--password", dest="password", help="ssh password")
+
+    parser.add_option('-k', '--kit', dest="kit", type='string', action='callback', callback=optionList, help="kits")
+    parser.add_option("-c", "--config", dest="config", help=".json config file")
+    parser.add_option("-b", "--buildDir", dest="buildDir", help="build directory")
+    parser.add_option("-f", "--fullUpdate", action="store_true", dest="fullUpdate", default=False, help="Send all files, otherwise only changed")
+    parser.add_option("-z", "--zip", action="store_true", dest="zip", default=False, help="Using zip compression")
+
+    (options, args) = parser.parse_args()
+    host = options.host
+    try:
+        port = int(options.port)
+    except Exception:
+        port = 22
+    user = options.user
+    password = options.password
+    configPath = options.config if options.config else 'deployment.json'
+    buildDir = options.buildDir
+    fullUpdate = options.fullUpdate
+    zip = options.zip
+
+    log = Logger()
+    for i in [(host,'-a|--host'),(user,'-u|--user'),(password,'-s|--password'),(buildDir,'-b|--buildDir')]:
+        if not i[0]:
+            log.error("%s parameter can't be empty" % i[1])
+            exit(1)
+
+    sshClient = SshClient()
+    if not sshClient.connect(host, port, user, password):
+        exit(1)
+
+    archFile = "package.tgz" if zip else "package.tar"
+    workDir = os.path.join(buildDir, 'deployment')
+    rootTarDir = os.path.join(workDir, 'package')
+    tmpTarFile = os.path.join(workDir, archFile)
+    remoteTarFile = os.path.join('/tmp/', archFile)
+
+    if not os.path.exists(workDir):
+        os.makedirs(workDir)
+
+    configLoader = ConfigLoader(configPath)
+    config = configLoader.config(options.kit)
+    analyser = FilesAnalyser(workDir, config, fullUpdate, buildDir)
+    filesToSend = analyser.getFilesToSend()
+    filesToRemove = analyser.getFilesToRemove()
+
+    if filesToSend or filesToRemove:
+        if 'preInstall' in config:
+            for command in config['preInstall']:
+                sshClient.runCommand(command, True)
+
+        if os.path.exists(rootTarDir):
+            shutil.rmtree(rootTarDir)
+        tar = tarfile.open(tmpTarFile, "w:gz" if zip else "w")
+        for file in filesToSend:
+            log.info("Adding to package '%s'" % file['src'])
+            tmpDir = os.path.join(rootTarDir, os.path.dirname(file['dest'].strip("/")))
+            if not os.path.exists(tmpDir):
+                os.makedirs(tmpDir)
+            tmpFile = os.path.join(tmpDir, os.path.basename(file['dest']))
+            shutil.copy(file['src'], tmpFile)
+            if file['permit']:
+                subprocess.call(['chmod', file['permit'], tmpFile])
+        tar.add(rootTarDir, '/')
+        tar.close()
+
+        log.notice("Sending package to the remote host...")
+        sshClient.sendFile(tmpTarFile, remoteTarFile)
+        log.notice("Extracting package on the remote host...")
+        sshClient.runCommand("tar --no-same-owner -xf %s -C /" % remoteTarFile, False)
+
+        for file in filesToRemove:
+            log.info("Deleting '%s'" % file)
+            sshClient.runCommand("rm -f %s" % file, False)
+
+        if 'postInstall' in config:
+            for command in config['postInstall']:
+                sshClient.runCommand(command, True)
+    else:
+        log.notice('No changes')
+
+    sshClient.closeConnection()
