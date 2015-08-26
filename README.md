@@ -2,7 +2,7 @@
 Simple remote deployment tool for linux. It's used for uploading any files to the remote linux system during development. This script archives changed files (optional all) then sends archive to the remote host over SSH and unpacks it's there. Also it can run commands before or after uploading.
 
 # How to use
-In the root of project (optional wherever you like) you need to create config file in JSON format, see below and run main script.
+In the root of project (optional wherever you like) you need to create config file in JSON format (see below) and run main script.
 ```
 sdeploy -a 192.168.0.1 -p 2222 -u root -p 111 -b build -k mainapp
 ```
