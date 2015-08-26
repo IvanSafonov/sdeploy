@@ -35,6 +35,10 @@ All available options:
                 "dest": "/opt/foobar/lib/"
             },
             {
+                "src": "config/main.ini",
+                "dest": "/opt/foobar/conf/"
+            },
+            {
                 "src": "%{buildDir}/plugins",
                 "dest": "/opt/foobar/plugins",
                 "mask": "lib.*\\.so",
