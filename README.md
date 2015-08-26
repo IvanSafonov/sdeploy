@@ -3,8 +3,11 @@ Simple remote deployment tool for linux. It's used for uploading any files to th
 
 # How to use
 In the root of project (optional wherever you like) you need to create config file in JSON format, see below and run main script.
-sdeploy -a 192.168.0.1 -p 2222 -u root -p 111 -k mainapp
+```
+sdeploy -a 192.168.0.1 -p 2222 -u root -p 111 -b build -k mainapp
+```
 
+```
 All available options:
   -h, --help            show this help message and exit
   -a HOST, --host=HOST  remote linux machine host
@@ -20,8 +23,10 @@ All available options:
                         build directory
   -f, --fullUpdate      send all files
   -z, --zip             using zip compression
+```
 
 # Config file example
+```json
 {
     "corelib" : {
         "files": [
@@ -53,6 +58,7 @@ All available options:
         "kits": ["corelib"]
     }
 }
-"corelib" and "mainapp" is the kits. Every kit contains list of files (field "files") to send to the remote host, lists of commands (fields "preInstall" and "postInstall") and other included kits (field "kits"). In "files" "src" is a source file or directory, "dest" is a target path on the remote host, "mask" is a pattern for matching files to send, "exclude" is a pattern to selectively exclude certain files. Directories is copied recursively.
+```
+"corelib" and "mainapp" is the kits. Every kit contains list of files (field "files") to send to the remote host, lists of commands (fields "preInstall" and "postInstall") and other included kits (field "kits"). In "files" "src" is a source file or directory, "dest" is a target path on the remote host, "mask" is a pattern for matching files to send, "exclude" is a pattern to selectively exclude certain files. Directories is copied recursively. In "src" "%{buildDir}" is replaced with current build directory.
 
 
