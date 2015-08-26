@@ -70,25 +70,26 @@ if __name__ == "__main__":
             for command in config['preInstall']:
                 sshClient.execCommand(command, True)
 
-        if os.path.exists(rootTarDir):
-            shutil.rmtree(rootTarDir)
-        tar = tarfile.open(tmpTarFile, "w:gz" if zip else "w")
-        for file in filesToSend:
-            log.info("Adding to package '%s'" % file['src'])
-            tmpDir = os.path.join(rootTarDir, os.path.dirname(file['dest'].strip("/")))
-            if not os.path.exists(tmpDir):
-                os.makedirs(tmpDir)
-            tmpFile = os.path.join(tmpDir, os.path.basename(file['dest']))
-            shutil.copy(file['src'], tmpFile)
-            if file['permit']:
-                subprocess.call(['chmod', file['permit'], tmpFile])
-        tar.add(rootTarDir, '/')
-        tar.close()
+        if filesToSend:
+            if os.path.exists(rootTarDir):
+                shutil.rmtree(rootTarDir)
+            tar = tarfile.open(tmpTarFile, "w:gz" if zip else "w")
+            for file in filesToSend:
+                log.info("Adding to package '%s'" % file['src'])
+                tmpDir = os.path.join(rootTarDir, os.path.dirname(file['dest'].strip("/")))
+                if not os.path.exists(tmpDir):
+                    os.makedirs(tmpDir)
+                tmpFile = os.path.join(tmpDir, os.path.basename(file['dest']))
+                shutil.copy(file['src'], tmpFile)
+                if file['permit']:
+                    subprocess.call(['chmod', file['permit'], tmpFile])
+            tar.add(rootTarDir, '/')
+            tar.close()
 
-        log.notice("Sending package to the remote host...")
-        sshClient.sendFile(tmpTarFile, remoteTarFile)
-        log.notice("Extracting package on the remote host...")
-        sshClient.execCommand("tar --no-same-owner -xf %s -C /" % remoteTarFile, False)
+            log.notice("Sending package to the remote host...")
+            sshClient.sendFile(tmpTarFile, remoteTarFile)
+            log.notice("Extracting package on the remote host...")
+            sshClient.execCommand("tar --no-same-owner -xf %s -C /" % remoteTarFile, False)
 
         for file in filesToRemove:
             log.info("Deleting '%s'" % file)

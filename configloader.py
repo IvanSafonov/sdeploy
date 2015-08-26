@@ -26,7 +26,7 @@ class ConfigLoader(object):
             self.log.error("No kits in the config file")
             exit(1)
         if kits and len(kits) > 0:
-            if not kits in confKits:
+            if not set(kits).issubset(set(confKits)):
                 self.log.error("No such kits '%s' in the config file" % kits)
                 exit(1)
             confKits = kits
