@@ -68,7 +68,7 @@ if __name__ == "__main__":
     if filesToSend or filesToRemove:
         if 'preInstall' in config:
             for command in config['preInstall']:
-                sshClient.runCommand(command, True)
+                sshClient.execCommand(command, True)
 
         if os.path.exists(rootTarDir):
             shutil.rmtree(rootTarDir)
@@ -88,15 +88,15 @@ if __name__ == "__main__":
         log.notice("Sending package to the remote host...")
         sshClient.sendFile(tmpTarFile, remoteTarFile)
         log.notice("Extracting package on the remote host...")
-        sshClient.runCommand("tar --no-same-owner -xf %s -C /" % remoteTarFile, False)
+        sshClient.execCommand("tar --no-same-owner -xf %s -C /" % remoteTarFile, False)
 
         for file in filesToRemove:
             log.info("Deleting '%s'" % file)
-            sshClient.runCommand("rm -f %s" % file, False)
+            sshClient.execCommand("rm -f %s" % file, False)
 
         if 'postInstall' in config:
             for command in config['postInstall']:
-                sshClient.runCommand(command, True)
+                sshClient.execCommand(command, True)
     else:
         log.notice('No changes')
 

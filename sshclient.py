@@ -9,13 +9,11 @@ class SshClient(object):
     def __new__(self, *args, **kwargs):
         if not self._instance:
             self._instance = super(SshClient, self).__new__(self, *args, **kwargs)
+            self.sshClient = None
+            self.sftpClient = None
+            self.transport = None
+            self.log = Logger()
         return self._instance
-
-    def __init__(self):
-        self.sshClient = None
-        self.sftpClient = None
-        self.transport = None
-        self.log = Logger()
 
     def connect(self, host, port, user, password):
         try:
@@ -34,10 +32,10 @@ class SshClient(object):
         if printLog:
             self.log.notice("Execute command '%s' on remote host" % command)
         stdin, stdout, stderr = self.sshClient.exec_command(command)
-        stderrStr = stderr.read()
-        if stderrStr:
-            self.log.error("stderr: %s" % stderrStr.strip())
         if printLog:
+            stderrStr = stderr.read()
+            if stderrStr:
+                self.log.error("stderr: %s" % stderrStr.strip())
             stdoutStr = stdout.read()
             if stdoutStr:
                 self.log.notice("stdout: %s" % stdoutStr.strip())

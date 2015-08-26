@@ -9,14 +9,14 @@ from logger import Logger
 
 class FilesAnalyser(object):
     def __init__(self, workDir, config, fullUpdate, buildDir):
+        self.log = Logger()
+        self.newChanges = {}
+        self.filesToSend = []
+        self.fullUpdate = fullUpdate
         self.config = config
         self.buildDir = buildDir
         self.changesFileName = os.path.join(workDir, 'changes')
         self.prevChanges = self._loadPreviousChanges()
-        self.newChanges = {}
-        self.filesToSend = []
-        self.fullUpdate = fullUpdate
-        self.log = Logger()
 
     def _addFile(self, file):
         if os.path.isdir(file['src']):
@@ -49,7 +49,7 @@ class FilesAnalyser(object):
 
         srcTime = os.path.getmtime(file['src'])
         self.newChanges[file['src']] = {"time": srcTime, "dest": file['dest']}
-        if not self.fullUpdate and file['src'] in self.prevChanges and abs(srcTime - self.prevChanges[file['src']]) <= 0.01:
+        if not self.fullUpdate and file['src'] in self.prevChanges and abs(srcTime - self.prevChanges[file['src']]["time"]) <= 0.01:
             return
         self.filesToSend.append(file)
 
