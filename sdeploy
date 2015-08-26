@@ -21,11 +21,11 @@ if __name__ == "__main__":
     parser.add_option("-u", "--user", dest="user", help="ssh user name")
     parser.add_option("-s", "--password", dest="password", help="ssh password")
 
-    parser.add_option('-k', '--kit', dest="kit", type='string', action='callback', callback=optionList, help="kits")
-    parser.add_option("-c", "--config", dest="config", help=".json config file")
+    parser.add_option('-k', '--kit', dest="kit", type='string', action='callback', callback=optionList, help="comma separated list of kits, all kits in config if not set")
+    parser.add_option("-c", "--config", dest="config", help=".json config file, deployment.json by default")
     parser.add_option("-b", "--buildDir", dest="buildDir", help="build directory")
-    parser.add_option("-f", "--fullUpdate", action="store_true", dest="fullUpdate", default=False, help="Send all files, otherwise only changed")
-    parser.add_option("-z", "--zip", action="store_true", dest="zip", default=False, help="Using zip compression")
+    parser.add_option("-f", "--fullUpdate", action="store_true", dest="fullUpdate", default=False, help="send all files")
+    parser.add_option("-z", "--zip", action="store_true", dest="zip", default=False, help="using zip compression")
 
     (options, args) = parser.parse_args()
     host = options.host
