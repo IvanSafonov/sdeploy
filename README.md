@@ -63,6 +63,16 @@ All available options:
     }
 }
 ```
-"corelib" and "mainapp" is the kits. Every kit contains list of files (field "files") to send to the remote host, lists of commands (fields "preInstall" and "postInstall") and other included kits (field "kits"). In "files" "src" is a source file or directory, "dest" is a target path on the remote host, "mask" is a pattern for matching files to send, "exclude" is a pattern to selectively exclude certain files. Directories is copied recursively. In "src" "%{buildDir}" is replaced with current build directory.
+```corelib``` and ```mainapp``` is the kits.
+Kit options:
+* ```files``` - list of files that sent to the remote host
+  * ```src``` - source file or directory path. Directories are copied recursively. Template ```%{buildDir}``` is replaced with current build directory.
+  * ```dest``` - target path on the remote host
+  * ```mask``` - pattern to selectively copying files
+  * ```exclude``` - pattern to selectively exclude certain files
+* ```preInstall``` - list of commands that will be executed before copying files
+* ```postInstall``` - list of commands that will be executed after copying files
+* ```kits``` - other included kits
+
 
 
