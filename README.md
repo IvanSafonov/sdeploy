@@ -1,5 +1,5 @@
 # sdeploy
-Simple remote deployment tool for linux. It's used for uploading any files to the remote linux system during development. This script archives changed files (optional all) then sends archive to the remote host over SSH and unpacks it's there. Also it can run commands before or after uploading.
+Simple remote deployment tool for linux. It's used for uploading any files to the remote linux system during development. This script archives changed files (optional all) then sends archive to the remote host over SSH and unpacks it's there. Also it can run commands before or after uploading. Depends on **paramiko**.
 
 # How to use
 In the root of project (optional wherever you like) you need to create config file in JSON format (see below) and run main script.
