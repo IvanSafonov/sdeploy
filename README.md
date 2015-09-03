@@ -1,5 +1,5 @@
 # sdeploy
-Simple remote deployment tool for linux. It's used for uploading any files to the remote linux system during development. This script archives changed files (optional all) then sends archive to the remote host over SSH and unpacks it's there. Also it can run commands before or after uploading.
+Simple remote deployment tool for linux. It's used for uploading any files to the remote linux system during development. This script archives changed files (optional all) then sends archive to the remote host over SSH and unpacks it's there. Also it can run commands before or after uploading. Depends on **paramiko**.
 
 # How to use
 In the root of project (optional wherever you like) you need to create config file in JSON format (see below) and run main script.
@@ -63,6 +63,16 @@ All available options:
     }
 }
 ```
-"corelib" and "mainapp" is the kits. Every kit contains list of files (field "files") to send to the remote host, lists of commands (fields "preInstall" and "postInstall") and other included kits (field "kits"). In "files" "src" is a source file or directory, "dest" is a target path on the remote host, "mask" is a pattern for matching files to send, "exclude" is a pattern to selectively exclude certain files. Directories is copied recursively. In "src" "%{buildDir}" is replaced with current build directory.
+```corelib``` and ```mainapp``` is the kits.
+Kit options:
+* ```files``` - list of files that sent to the remote host
+  * ```src``` - source file or directory path. Directories are copied recursively. Template ```%{buildDir}``` is replaced with current build directory.
+  * ```dest``` - target path on the remote host
+  * ```mask``` - pattern to selectively copying files
+  * ```exclude``` - pattern to selectively exclude certain files
+* ```preInstall``` - list of commands that will be executed before copying files
+* ```postInstall``` - list of commands that will be executed after copying files
+* ```kits``` - other included kits
+
 
 
