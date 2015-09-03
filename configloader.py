@@ -40,6 +40,9 @@ class ConfigLoader(object):
     def _addKit(self, result, addedKits, name):
         if name in addedKits:
             return
+        if name not in self.jsonData:
+            self.log.error("Unknown kit '%s'" %name)
+            return
         addedKits.add(name)
         kit = self.jsonData[name]
         if 'preInstall' in kit:

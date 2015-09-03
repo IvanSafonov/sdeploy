@@ -89,7 +89,7 @@ if __name__ == "__main__":
             log.notice("Sending package to the remote host...")
             sshClient.sendFile(tmpTarFile, remoteTarFile)
             log.notice("Extracting package on the remote host...")
-            sshClient.execCommand("tar --no-same-owner -xf %s -C /" % remoteTarFile, False)
+            sshClient.execCommand("tar -m --no-same-owner -xf %s -C /" % remoteTarFile, False)
 
         for file in filesToRemove:
             log.info("Deleting '%s'" % file)
