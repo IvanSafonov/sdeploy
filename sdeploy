@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_option("-c", "--config", dest="config", help=".json config file, deployment.json by default")
     parser.add_option("-b", "--buildDir", dest="buildDir", help="build directory")
     parser.add_option("-f", "--fullUpdate", action="store_true", dest="fullUpdate", default=False, help="send all files")
+    parser.add_option("-t", "--strip", action="store_true", dest="strip", default=False, help="strip binary files")
     parser.add_option("-z", "--zip", action="store_true", dest="zip", default=False, help="using zip compression")
 
     (options, args) = parser.parse_args()
@@ -38,6 +39,7 @@ if __name__ == "__main__":
     configPath = options.config if options.config else 'deployment.json'
     buildDir = options.buildDir
     fullUpdate = options.fullUpdate
+    strip = options.strip
     zip = options.zip
 
     log = Logger()
@@ -83,13 +85,19 @@ if __name__ == "__main__":
                 shutil.copy(file['src'], tmpFile)
                 if file['permit']:
                     subprocess.call(['chmod', file['permit'], tmpFile])
+                if strip:
+                    process = subprocess.Popen(["file", "-b", "--mime-type", tmpFile], stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+                    (stdout, stderr) = process.communicate()
+                    if stdout.strip() in ["application/x-sharedlib", "application/x-executable"]:
+                        subprocess.call(['strip', tmpFile])
+
             tar.add(rootTarDir, '/')
             tar.close()
 
             log.notice("Sending package to the remote host...")
             sshClient.sendFile(tmpTarFile, remoteTarFile)
             log.notice("Extracting package on the remote host...")
-            sshClient.execCommand("tar -m --no-same-owner -xf %s -C /" % remoteTarFile, False)
+            sshClient.execCommand("tar -m -P --no-same-owner -xf %s -C /" % remoteTarFile, False)
 
         for file in filesToRemove:
             log.info("Deleting '%s'" % file)

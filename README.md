@@ -22,6 +22,7 @@ All available options:
   -b BUILDDIR, --buildDir=BUILDDIR
                         build directory
   -f, --fullUpdate      send all files
+  -t, --strip           strip binary files
   -z, --zip             using zip compression
 ```
 
